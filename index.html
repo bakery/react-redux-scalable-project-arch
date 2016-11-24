@@ -1,0 +1,454 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Mobile MVPs with React Native</title>
+    <link rel="shortcut icon" href="http://blog.thebakery.io/favicon.ico">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/white.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/github.css">
+
+    <link rel="shortcut icon" href="http://blog.thebakery.io/favicon.png">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <style type="text/css">
+      img {
+        border: none !important;
+      }
+
+      .reveal pre {
+        box-shadow: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <!-- data-background-video="video/bg.mp4" data-background-video-loop data-background-video-muted -->
+          <h2>Scalable project structure for React + Redux apps</h2>
+
+          <p>Philip // The Bakery - <a href="http://twitter.com/bakeryhq">@bakeryhq</a></p>
+        </section>
+
+        <section data-markdown>
+          # 🙋
+          ### Let's keep this interactive
+        </section>
+
+        <section data-markdown>
+          ## Scalable how?
+          
+          - know where things are
+          - minimize change surface area
+          - collocation for related things
+        </section>
+
+        <section data-markdown>
+          ## React + Redux apps 
+          - ✨components/containers
+          - ⚡ actions
+          - 🔧reducers
+          - 🍴state access helpers (e.g. selectors)
+          - tools for side effects (e.g. sagas)
+        </section>
+        
+        <section data-markdown>
+          ## The "official" way
+          [redux/examples/real-world](https://github.com/reactjs/redux/tree/master/examples/real-world)
+        </section>
+
+        <section data-markdown>
+          ## Project structure
+          ```
+          ├──⚡actions⚡
+          │   └── index.js
+          ├──✨components✨
+          │   ├── Explore.js
+          │   └── User.js
+          ├──✨containers✨
+          │   ├── App.js
+          │   └── UserPage.js
+          ├── middleware
+          │   └── api.js
+          ├── 🔧reducers🔧
+          │   ├── index.js
+          │   └── paginate.js
+          ├── routes.js
+          └── store
+              └── configureStore.js
+          ```
+        </section>
+
+        <section>
+          <h2>Actions</h2>
+          <p>src/actions/index.js</p>
+          <pre>
+            <code class="hljs">
+export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
+
+// Resets the currently visible error message.
+export const resetErrorMessage = () => ({
+    type: RESET_ERROR_MESSAGE
+})
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Reducers</h2>
+          <p>src/reducers/index.js</p>
+          <pre>
+            <code class="hljs">
+⚡ import * as ActionTypes from '../actions'
+import paginate from './paginate'
+import { routerReducer as routing } from 'react-router-redux'
+import { combineReducers } from 'redux'
+
+🔧const entities = (state = { users: {}, repos: {} }, action) => {
+  return state
+}
+
+/* more reducers defined here */
+
+const rootReducer = combineReducers({ entities, pagination })
+
+export default rootReducer
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Containers</h2>
+          <p>src/containers/UserPage.js</p>
+          <pre>
+            <code class="hljs">
+import { ⚡loadUser, ⚡loadStarred } from '../actions'
+
+class UserPage extends Component { /* stuff here */ }
+
+const mapStateToProps = (state, ownProps) => {
+  const {
+    pagination: { starredByUser },
+    entities: { users, repos }
+  } = state
+
+  const starredRepos = starredPagination.ids.map(id => repos[id])
+  return { starredRepos }
+}
+
+export default connect(mapStateToProps, { ⚡loadUser, ⚡loadStarred })(UserPage)
+            </code>
+          </pre>
+        </section>
+
+        <section data-markdown>
+          ## React boilerplate
+          [mxstbr/react-boilerplate](https://github.com/mxstbr/react-boilerplate)
+        </section>
+
+        <section data-markdown>
+          ### Project structure
+          ```
+          ├── components
+          │   └── A
+          │       └── ✨index.js
+          ├── containers
+          │   └── App
+          │       ├── ⚡actions.js
+          │       ├── constants.js
+          │       ├── ✨index.js
+          │       ├── 🔧reducer.js
+          │       ├── 🍴selectors.js
+          │       └── tests
+          │           ├── ⚡actions.test.js
+          │           ├── index.test.js
+          │           ├── 🔧reducer.test.js
+          │           └── 🍴selectors.test.js
+          ├── reducers.js
+          └── store.js
+          ```
+        </section>
+
+        <section>
+          <h3>Actions</h3>
+          <p>app/containers/App/actions.js</p>
+          <pre>
+            <code class="hljs">
+import {
+  LOAD_REPOS,
+  LOAD_REPOS_SUCCESS,
+  LOAD_REPOS_ERROR,
+} from './constants';
+
+export function ⚡loadRepos() {
+  return {
+    type: LOAD_REPOS,
+  };
+}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Reducers</h3>
+          <p>app/containers/App/reducer.js</p>
+          <pre>
+            <code class="hljs">
+import {
+  LOAD_REPOS_SUCCESS,
+  LOAD_REPOS,
+  LOAD_REPOS_ERROR,
+} from './constants';
+
+function 🔧appReducer(state = initialState, action) {
+  return state;
+}
+
+export default appReducer;
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Selectors</h3>
+          <p>app/containers/App/selector.js</p>
+          <pre>
+            <code class="hljs">
+import { createSelector } from 'reselect';
+
+const selectGlobal = () => (state) => state.get('global');
+
+const 🍴selectCurrentUser = () => createSelector(
+  selectGlobal(),
+  (globalState) => globalState.get('currentUser')
+);
+
+export {
+  🍴selectGlobal,
+  🍴selectCurrentUser
+};
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Containers</h3>
+          <p>app/containers/HomePage/index.js</p>
+          <pre>
+            <code class="hljs">
+import { 🍴selectRepos } from 'containers/App/selectors';
+
+export class Page extends React.PureComponent {}
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    onChange: (evt) => dispatch(⚡changeUsername(evt.target.value))
+  };
+};
+
+const mapStateToProps = createStructuredSelector({
+  repos: 🍴selectRepos() 
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Page);
+            </code>
+          </pre>
+        </section>
+
+        <section data-markdown>
+          ## Wordpress Calypso
+          [Automattic/wp-calypso](https://github.com/Automattic/wp-calypso)
+        </section>
+
+        <section data-markdown>
+          ### Project structure
+          ```    
+          ├── components
+          │    ├── ✨index.jsx
+          │    └── style.scss
+          └── state
+              ├── action-types.js
+              └── posts 
+                  ├── ⚡actions.js
+                  ├── constants.js
+                  ├── 🔧reducer.js
+                  ├── schema.js
+                  ├── 🍴selectors.js
+                  └── test
+                      ├── actions.js
+                      ├── reducer.js
+                      └── selectors.js
+          ```
+        </section>
+
+        <section>
+          <h3>Actions</h3>
+          <p>client/state/posts/actions.js</p>
+          <pre>
+            <code class="hljs">
+import {
+  POSTS_RECEIVE,
+  POSTS_REQUEST,
+  POSTS_REQUEST_SUCCESS,
+  POSTS_REQUEST_FAILURE
+} from 'state/action-types';
+
+export function ⚡receivePosts( posts ) {
+  return {
+    type: POSTS_RECEIVE,
+    posts
+  };
+}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Reducers</h3>
+          <p>client/state/posts/reducer.js</p>
+          <pre>
+            <code class="hljs">
+import {
+  POSTS_REQUEST,
+  POSTS_REQUEST_SUCCESS,
+  POSTS_REQUEST_FAILURE
+} from 'state/action-types';
+
+export function 🔧siteRequests( state = {}, action ) {
+  return state;
+}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Selectors</h3>
+          <p>client/state/posts/selectors.js</p>
+          <pre>
+            <code class="hljs">
+import createSelector from 'lib/create-selector';
+
+export const 🍴getNormalizedPost = createSelector(
+  (state, globalId) => normalizePost(getPost(state, globalId)),
+  (state) => [state.posts.items, state.posts.queries]
+);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Containers</h3>
+          <p>client/components/data/query-geo/index.jsx</p>
+          <pre>
+            <code class="hljs">
+import { 🍴isRequestingGeo } from 'state/geo/selectors';
+import { ⚡requestGeo } from 'state/geo/actions';
+
+class QueryGeo extends Component {}
+
+export default connect(
+  ( state ) => ( { requesting: 🍴isRequestingGeo( state ) } ),
+  { ⚡requestGeo }
+)( QueryGeo );
+            </code>
+          </pre>
+        </section>
+
+        <section data-markdown>
+          *Bonus* 
+          ## Apollo Stack
+          [apollostack/GitHunt-React](https://github.com/apollostack/GitHunt-React)
+        </section>        
+
+        <section>
+          <h3>GraphQL</h3>
+          <video autoplay="" loop="" playsinline="">
+            <source src="http://graphql.org/img/graphiql.mp4?x" type="video/mp4">
+          </video>
+          <p>source: <a href="http://graphql.org/">graphql.org</a></p>
+        </section>
+
+        <section data-markdown>
+          ### Project structure
+
+          ```
+          ├── package.json
+          ├── ui
+          │   ├── client.js
+          │   ├── components
+          │   │   └── Feed.js
+          │   ├── routes
+          │   │   └── FeedPage.js
+          │   ├── server.js
+          │   └── style
+          │       └── index.css
+          └── webpack.config.js
+          ```
+        </section>
+
+        <section>
+          <h3>Containers</h3>
+          <p>ui/routes/FeedPage.js</p>
+          <pre>
+            <code class="hljs">
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
+
+class FeedPage extends React.Component { }
+
+const FEED_QUERY = gql`
+  query Feed($type: FeedType!, $offset: Int, $limit: Int) {
+    feed(type: $type, offset: $offset, limit: $limit) {
+      ...FeedEntry
+    }
+  }
+`;
+
+const withData = graphql(FEED_QUERY, { /* ... */ });
+export default withData(FeedPage);
+            </code>
+          </pre>
+        </section>
+
+        <section data-markdown>
+          ### Thank you 🙇
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          {
+            src: 'plugin/highlight/highlight.js', async: true,
+            callback: function() { hljs.initHighlightingOnLoad(); } 
+          }
+        ]
+      });
+    </script>
+  </body>
+</html>
